@@ -2,10 +2,10 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sp
-import ollama
+from groq import Groq
 
 st.title("Polynomial Examples Generator")
-st.info("Make sure Ollama is running locally on your computer before generating examples.")
+st.info("This app uses Groq AI to generate real-world polnomial examples.")
 
 # User inputs
 degree = st.selectbox("Select polynomial degree", [2, 3, 4, 5])
@@ -47,15 +47,16 @@ if st.button("Generate Example"):
     ax.grid(True)
     st.pyplot(fig)
     
-    # AI-generated example using Ollama
+    # AI-generated example using Groq
     st.write("Generating real-world example...")
     prompt = f"Generate a real-world example for the polynomial {poly} in {context.lower()} context, suitable for college algebra students. Explain its application and how to analyze it. Keep the explanation clear and concise."
     try:
-        response = ollama.chat(
-            model='tinyllama',
+        client = Groq(api_key=st.secrets["groq"]["api_key"])
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
             messages=[{'role': 'user', 'content': prompt}]
         )
         st.write("Real-world example:")
-        st.write(response['message']['content'])
+        st.write(response.choices[0].message.content)
     except Exception as e:
-        st.error(f"Error: {e}. Make sure Ollama is running and the llama2:latest model is installed.")
+        st.error(f"Error: {e}")
