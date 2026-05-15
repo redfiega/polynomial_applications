@@ -52,7 +52,7 @@ if st.button("Generate Example"):
     prompt = f"Generate a real-world example for the polynomial {poly} in {context.lower()} context, suitable for college algebra students. Explain its application and how to analyze it. Keep the explanation clear and concise."
     try:
         response = ollama.chat(
-            model='llama2:latest',
+            model='tinyllama',
             messages=[{'role': 'user', 'content': prompt}]
         )
         st.write("Real-world example:")
