@@ -7,7 +7,6 @@ from groq import Groq
 st.title("Polynomial Examples Generator")
 st.info("This app uses Groq AI to generate real-world polynomial examples.")
 
-# Grounding: curated list of application domains injected into every prompt
 APPLICATION_DOMAINS = {
     "Business": [
         "total revenue as a function of units sold (evaluate for specific quantities)",
@@ -57,14 +56,11 @@ factorable = st.checkbox("Include factorable polynomials with zeros analysis")
 
 if st.button("Generate Example"):
 
-    # Build polynomial in SymPy first, then derive numpy version from it
-    # This ensures the graph and the LLM prompt use the SAME polynomial
     x = sp.Symbol('x')
     coeffs = [int(c) for c in np.random.randint(-5, 6, degree + 1)]
-    coeffs[0] = int(np.random.randint(1, 6))  # positive leading coefficient
+    coeffs[0] = int(np.random.randint(1, 6))
     sym_poly = sum(c * x**(degree - i) for i, c in enumerate(coeffs))
 
-    # Convert sym_poly to a numpy-callable function for plotting
     poly_func = sp.lambdify(x, sym_poly, 'numpy')
 
     st.write("Generated polynomial:")
@@ -76,13 +72,20 @@ if st.button("Generate Example"):
 
     if factorable:
         roots = sp.solve(sym_poly, x)
-        distinct_roots = sorted(set(roots), key=lambda r: str(r))
-        root_info = [f"${sp.latex(root)}$ (multiplicity {sp.multiplicity(root, sym_poly)})" for root in distinct_roots]
-        st.markdown("**Zeros and multiplicities:**")
-        for info in root_info:
-            st.markdown(f"- {info}")
+        real_roots = [r for r in roots if sp.im(r) == 0]
 
-    # Plot using the same polynomial as the LLM prompt
+        if real_roots:
+            distinct_roots = sorted(set(real_roots), key=lambda r: float(r.evalf()))
+            st.markdown("**Zeros and multiplicities:**")
+            for root in distinct_roots:
+                try:
+                    mult = sp.multiplicity(root, sym_poly)
+                    st.markdown(f"- $x = {sp.latex(root)}$ (multiplicity {mult})")
+                except (ValueError, TypeError):
+                    st.markdown(f"- $x = {sp.latex(root)}$")
+        else:
+            st.info("This polynomial has no real zeros.")
+
     x_vals = np.linspace(-10, 10, 400)
     y_vals = poly_func(x_vals)
     fig, ax = plt.subplots()
