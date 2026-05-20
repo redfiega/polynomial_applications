@@ -90,7 +90,8 @@ sometimes paragraphs, sometimes included LaTeX.
 **Attempt 3 (final):**
 Moved role framing to system prompt. Added explicit 3-part output structure 
 (Context / Interpretation / Discussion question). Added word limit. 
-Added grounded domain list. Results became consistent and classroom-appropriate.
+Added grounded domain list. Results became consistent and classroom-appropriate
+(after a few adjustments). Fixed zeros analysis error.
 
 ---
 
